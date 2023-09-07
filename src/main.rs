@@ -1,25 +1,23 @@
 use std::{time::{Instant, Duration}, thread};
 
 use GLium::{GL, ColVert, ColBuffer};
-use bot::Bot;
 use game::{Game, Scrn, Dir, BMember, StartPos};
 use glium::glutin::{event_loop::EventLoop, event::{Event, WindowEvent, DeviceEvent, ElementState, VirtualKeyCode}};
 
 mod GLium;
 mod game;
-mod bot;
 
-const WIDTH: i8 = 127;
-const HEIGHT: i8 = 127;
+const WIDTH: i64 = 27;
+const HEIGHT: i64 = 27;
 const SEED: f64 = 123.0;
 
 struct Coords {
-    x: i8,
-    y: i8
+    x: i64,
+    y: i64
 }
 struct Dims {
-    w: i8,
-    h: i8
+    w: i64,
+    h: i64
 }
 struct Dynamic {
     apple: ColBuffer,
@@ -38,13 +36,13 @@ struct State {
     game: Game
 }
 
-fn board_coords(b: &Dims, x: i8, y: i8) -> (f32, f32) {
+fn board_coords(b: &Dims, x: i64, y: i64) -> (f32, f32) {
     return (
         -1.0 + x as f32 * (2.0 / b.w as f32),
         -1.0 + y as f32 * (2.0 / b.h as f32)
     )
 }
-fn make_board_rect(b: &Dims, x: i8, y: i8, col: [f32; 4], voff: u16) -> ([ColVert; 4], [u16; 6]) {
+fn make_board_rect(b: &Dims, x: i64, y: i64, col: [f32; 4], voff: u16) -> ([ColVert; 4], [u16; 6]) {
     let (cx, cy) = board_coords(b, x, y);
     make_rect(
         cx, 
@@ -55,7 +53,7 @@ fn make_board_rect(b: &Dims, x: i8, y: i8, col: [f32; 4], voff: u16) -> ([ColVer
         voff
     )
 }
-fn make_board_vert(b: &Dims, x: i8, y: i8, col: [f32; 4]) -> [ColVert; 4] {
+fn make_board_vert(b: &Dims, x: i64, y: i64, col: [f32; 4]) -> [ColVert; 4] {
     let (cx, cy) = board_coords(b, x, y);
     [
         ColVert { pos: [cx, cy], col },
@@ -74,13 +72,13 @@ fn make_rect(x: f32, y: f32, x2: f32, y2: f32, col: [f32; 4], voff: u16) -> ([Co
     let fi = [0u16, 2, 3, 0, 1, 3];
     (fv, fi.map(|x| x + voff))
 }
-fn init_bg(w: i8, h: i8, col: [f32; 4]) -> (Vec<ColVert>, Vec<u16>) {
+fn init_bg(w: i64, h: i64, col: [f32; 4]) -> (Vec<ColVert>, Vec<u16>) {
     let mut fv: Vec<ColVert> = vec![];
     let mut fi: Vec<u16> = vec![];
     let sw = 2.0 / w as f32;
     let sh = 2.0 / h as f32;
 
-    for x in 0..(w/2) { for y in 0..(h/2) {
+    for x in 0..(w as f64 / 2.0).ceil() as u16 { for y in 0..(h as f64 / 2.0).ceil() as u16 {
         let fx = x as f32 * 2.0;
         let fy = y as f32 * 2.0;
         let (fv1, fi1) = make_rect(
@@ -90,6 +88,12 @@ fn init_bg(w: i8, h: i8, col: [f32; 4]) -> (Vec<ColVert>, Vec<u16>) {
             1.0 - sh - fy * sh,
             col, fv.len() as u16
         );
+        fv.extend(fv1);
+        fi.extend(fi1);
+    }}
+    for x in 0..(w/2) { for y in 0..(h/2) {
+        let fx = x as f32 * 2.0;
+        let fy = y as f32 * 2.0;
         let (fv2, fi2) = make_rect(
             -1.0 + sw + fx * sw,
             1.0 - sh - fy * sh,
@@ -97,15 +101,13 @@ fn init_bg(w: i8, h: i8, col: [f32; 4]) -> (Vec<ColVert>, Vec<u16>) {
             1.0 - sh - sh - fy * sh,
             col, fv.len() as u16 + 4
         );
-        fv.extend(fv1);
         fv.extend(fv2);
-        fi.extend(fi1);
         fi.extend(fi2);
     }}
 
     (fv, fi)
 }
-fn init_scene_game(gl: &GL, w: i8, h: i8) -> ColBuffer {
+fn init_scene_game(gl: &GL, w: i64, h: i64) -> ColBuffer {
     let bg = init_bg(w, h, [0.01, 0.01, 0.01, 1.0]);
     gl.new_colbuf(&bg.0, &bg.1)
 }
@@ -119,7 +121,7 @@ fn recalc_board(gl: &GL, game: &Game, res: &mut Dynamic, growing: bool) {
     match growing {
         true => for x in 0..game.b.b.len() { for y in 0..game.b.b[x].len() {
             let bm = match game.b.b[x][y] {
-                BMember::Snake => Some(make_board_rect(&dims, x as i8, y as i8, [0.1, 0.1, 0.04, 1.0], tv.len() as u16)),
+                BMember::Snake => Some(make_board_rect(&dims, x as i64, y as i64, [0.1, 0.1, 0.04, 1.0], tv.len() as u16)),
                 _ => None
             };
             match bm {
@@ -132,7 +134,7 @@ fn recalc_board(gl: &GL, game: &Game, res: &mut Dynamic, growing: bool) {
         }},
         false => for x in 0..game.b.b.len() { for y in 0..game.b.b[x].len() {
             let bm = match game.b.b[x][y] {
-                BMember::Snake => Some(make_board_vert(&dims, x as i8, y as i8, [0.1, 0.1, 0.04, 1.0])),
+                BMember::Snake => Some(make_board_vert(&dims, x as i64, y as i64, [0.1, 0.1, 0.04, 1.0])),
                 _ => None
             };
             match bm {

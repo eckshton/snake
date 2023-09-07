@@ -15,33 +15,33 @@ pub enum Scrn {
 }
 struct Instruction {
     dir: Dir,
-    x: i8,
-    y: i8
+    x: i64,
+    y: i64
 }
 pub struct StartPos {
-    pub snake_x: i8,
-    pub snake_y: i8,
-    pub apple_x: i8,
-    pub apple_y: i8
+    pub snake_x: i64,
+    pub snake_y: i64,
+    pub apple_x: i64,
+    pub apple_y: i64
 }
 pub struct Board {
-    pub w: i8,
-    pub h: i8,
+    pub w: i64,
+    pub h: i64,
     pub b: Vec<Vec<BMember>>
 }
 pub struct Snake {
-    pub x: i8,
-    pub y: i8,
+    pub x: i64,
+    pub y: i64,
     pub l: u16,
     pub d: Dir,
-    pub tx: i8,
-    pub ty: i8,
+    pub tx: i64,
+    pub ty: i64,
     pub td: Dir,
     tailinst: Vec<Instruction>
 }
 pub struct Apple {
-    pub x: i8,
-    pub y: i8
+    pub x: i64,
+    pub y: i64
 }
 pub struct Game {
     pub s: Snake,
@@ -62,7 +62,7 @@ fn prng(seed: f64, inc: f64) -> f32 {
 }
 
 impl Game {
-    pub fn new(w: i8, h: i8, start_pos: &StartPos, seed: f64) -> Self {
+    pub fn new(w: i64, h: i64, start_pos: &StartPos, seed: f64) -> Self {
         let s = Snake {
             x: start_pos.snake_x,
             y: start_pos.snake_y,
@@ -116,9 +116,9 @@ impl Game {
     fn eat_apple(self: &mut Self) {
         self.s.l = 3;
 
-        let mut x = (prng(self.seed, self.apple_ct as f64) * self.b.w as f32) as i8;
-        let mut y = (prng(self.seed, self.apple_ct as f64 + 0.5) * self.b.h as f32) as i8;
-        let mut i = 0;
+        let mut x = (prng(self.seed, self.apple_ct as f64) * self.b.w as f32) as i64;
+        let mut y = (prng(self.seed, self.apple_ct as f64 + 0.5) * self.b.h as f32) as i64;
+        let mut i: i64 = 0;
         while self.b.b[x as usize][y as usize] != BMember::Empty && i < self.b.w * self.b.h {
             x += 1;
             y += 1;
@@ -185,12 +185,12 @@ impl Game {
     }
 }
 impl StartPos {
-    pub fn init(w: i8, h: i8) -> Self {
+    pub fn init(w: i64, h: i64) -> Self {
         StartPos { 
-            snake_x: (w as f32 * 0.25).floor() as i8, 
-            snake_y: (h as f32 * 0.5).floor() as i8, 
-            apple_x: (w as f32 * 0.75).floor() as i8, 
-            apple_y: (h as f32 * 0.5).floor() as i8 
+            snake_x: (w as f32 * 0.25).floor() as i64, 
+            snake_y: (h as f32 * 0.5).floor() as i64, 
+            apple_x: (w as f32 * 0.75).floor() as i64, 
+            apple_y: (h as f32 * 0.5).floor() as i64 
         }
     }
 }
