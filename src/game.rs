@@ -165,22 +165,22 @@ impl Game {
             self.apple_ct += 1;
             self.eat_apple();
         }
-        self.b.b[self.s.tx as usize][self.s.ty as usize] = BMember::Empty;
         if self.s.l > 0 {
             self.s.l -= 1;
             return;
+        }
+        self.b.b[self.s.tx as usize][self.s.ty as usize] = BMember::Empty;
+        match self.s.td {
+            Dir::Up => self.s.ty += 1,
+            Dir::Down => self.s.ty -= 1,
+            Dir::Left => self.s.tx -= 1,
+            Dir::Right => self.s.tx += 1,
         }
         if self.s.tailinst.len() != 0 {
             if self.s.tailinst[0].x == self.s.tx && self.s.tailinst[0].y == self.s.ty {
                 self.s.td = self.s.tailinst[0].dir;
                 self.s.tailinst.remove(0);
             }
-        }
-        match self.s.td {
-            Dir::Up => self.s.ty += 1,
-            Dir::Down => self.s.ty -= 1,
-            Dir::Left => self.s.tx -= 1,
-            Dir::Right => self.s.tx += 1,
         }
     }
 }
