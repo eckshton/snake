@@ -116,27 +116,26 @@ impl Game {
     fn eat_apple(self: &mut Self) {
         self.s.l = 3;
 
-        let mut x = (prng(self.seed, self.apple_ct as f64) * self.b.w as f32) as i64;
-        let mut y = (prng(self.seed, self.apple_ct as f64 + 0.5) * self.b.h as f32) as i64;
-        let mut i: i64 = 0;
-        while self.b.b[x as usize][y as usize] != BMember::Empty && i < self.b.w * self.b.h {
-            x += 1;
-            y += 1;
-            if x >= self.b.w {
-                x = 0
+        let mut ax = (prng(self.seed, self.apple_ct as f64) * self.b.w as f32) as i64;
+        let mut ay = (prng(self.seed, self.apple_ct as f64 + 0.5) * self.b.h as f32) as i64;
+        for _ in 0..self.b.w { for _ in 0..self.b.h {
+            if ax != self.a.x && ay != self.a.y {
+                if self.b.b[ax as usize][ay as usize] == BMember::Empty {
+                    self.a.x = ax;
+                    self.a.y = ay;
+                    return
+                }
             }
-            if y >= self.b.h {
-                y = 0
+            ax += 1;
+            if ax >= self.b.w {
+                ax = 0;
+                ay += 1;
             }
-            i += 1;
-        }
-
-        if i == (self.b.w * self.b.h) - 1 {
-            self.lost = true;
-        }
-
-        self.a.x = x;
-        self.a.y = y;
+            if ay >= self.b.h {
+                ay = 0;
+            }
+        }}
+        self.lost = true
     }
     pub fn step(self: &mut Self, i: Option<Dir>) {
         if self.lost { return }

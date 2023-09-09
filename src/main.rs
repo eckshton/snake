@@ -7,8 +7,8 @@ use glium::glutin::{event_loop::EventLoop, event::{Event, WindowEvent, DeviceEve
 mod GLium;
 mod game;
 
-const WIDTH: i64 = 27;
-const HEIGHT: i64 = 27;
+const WIDTH: i64 = 9;
+const HEIGHT: i64 = 9;
 const SEED: f64 = 123.0;
 
 struct Coords {

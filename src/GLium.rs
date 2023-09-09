@@ -46,8 +46,8 @@ impl GL {
         let wb = WindowBuilder::new().with_title("snek");
         let cb = ContextBuilder::new().with_vsync(true);
         let d = Display::new(wb, cb, events_loop).unwrap();
-        let tp = new_program(&d, "src/shader/vertex/tex.glsl", "src/shader/fragment/tex.glsl");
-        let cp = new_program(&d, "src/shader/vertex/solid.glsl", "src/shader/fragment/solid.glsl");
+        let tp = new_program(&d, "shader/vertex/tex.glsl", "shader/fragment/tex.glsl");
+        let cp = new_program(&d, "shader/vertex/solid.glsl", "shader/fragment/solid.glsl");
         GL {
             d,
             tp,
